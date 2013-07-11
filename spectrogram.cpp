@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <cstring>
 
 Spectrogram::Spectrogram(SpectrumAnalyser *analyser, QWidget *parent) :
     QWidget(parent), m_analyser(analyser)
@@ -29,7 +30,13 @@ void Spectrogram::moreSpectrum()
     QSize size(h, w); // rotate 90 degrees
 
     if (size == m_image.size()) {
-        std::copy(m_image.bits() + m_image.bytesPerLine(), m_image.bits() + m_image.byteCount(), m_image.bits());
+        //std::copy(m_image.bits() + m_image.bytesPerLine(), m_image.bits() + m_image.byteCount(), m_image.bits());
+        void* dest = m_image.bits();
+        for (int x = 1; x < w; ++x) {
+            void* source = m_image.bits() + x * m_image.bytesPerLine();
+            std::memcpy(dest, source, m_image.bytesPerLine());
+            dest = source;
+        }
     } else {
         m_image = QImage(size, QImage::Format_RGB32);
         m_image.fill(Qt::white);
